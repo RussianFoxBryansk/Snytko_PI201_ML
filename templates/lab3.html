@@ -2,5 +2,18 @@
  
 {% block content %}
 {{ super() }}
-<p>Логистическая регрессия для классификации Ирисов
+<p>Линейная регрессия
+    <form action="/p_lab3" method="POST">
+    <p><input type="text" class="form_text" name="list1"> Рост (см)</p>
+    <p><input name="list2" class="form_text" type="text"> Вес (кг)</p>
+    <p>
+    <select name="list3" class="form_select">
+        <option value="1">Мужчина</option>
+        <option value="0">Женщина</option>
+    </select> Пол
+    </p>
+    <input type="submit" class="form_btn" value="Узнать размер обуви">
+    <h1>{{class_model}}</h1>
+    </p>
+</form>
 {% endblock %}

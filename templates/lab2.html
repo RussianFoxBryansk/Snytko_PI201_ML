@@ -2,5 +2,17 @@
  
 {% block content %}
 {{ super() }}
-<p>Логистическая регрессия для расчета стоимости жилья
+<p>Логистическая регрессия
+<form action="/p_lab2" method="POST">
+    <p><input type="text" class="form_text" name="list1"> Рост (см)</p>
+    <p><input name="list2" class="form_text" type="text"> Вес (кг)</p>
+    <p><input name="list3" class="form_text" type="text"> Окрас (0-4) </p>
+    <p><input name="list4" class="form_text" type="text"> Возраст (лет)</p>
+    <input type="submit" class="form_btn" value="Узнать породу кошки">
+    <h1>{{class_model}}</h1>
+    </p>
+</form>
+
+
+
 {% endblock %}
