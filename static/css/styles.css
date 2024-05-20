@@ -17,11 +17,11 @@ a:hover {
 .clear {clear: both;}
 ul.mainmenu {
 	list-styLe: none;
-	background: #3F4137;
+	background:#3cc8d79c;
 	height: 60px;
 	margin: 0;
 	padding: 0;
-	color: #fdc073;
+	color: #db2d2d;
 	font-size: 20px;
 	overflow: hidden;
 }
@@ -31,11 +31,11 @@ ul.mainmenu li {
 }
 ul.mainmenu li.last {float: right;}
 ul.mainmenu li a {
-	coLor: #fdc073;
+	coLor: #db2d2d;
 	text-decoration: none;
 }
 ul.mainmenu li a:hover {
-	color: #FDA83D;
+	color: #db2d2d;
 }
 
 div.content {
@@ -46,7 +46,7 @@ form {
     margin-right: auto;
     max-width: 450px;
     background-color: #3F4137;
-    color: #fdc073;
+    color: #db2d2d;
     border: 1px solid gray;
     border-radius: 5px;
     padding: 10px;

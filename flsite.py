@@ -1,7 +1,6 @@
 import pickle
 import numpy as np
-from flask import Flask, render_template, url_for, request
-
+from flask import Flask, render_template, url_for, request, jsonify
 
 app = Flask(__name__)
 
@@ -139,6 +138,25 @@ def f_lab3():
         preds = str('{:.2f}'.format(model.predict(X_new)[0][0]))
         return render_template('lab3.html', title="Линейная регрессия", menu=menu, class_model="Это: " + str(preds))
 
+
+@app.route('/api', methods=[ 'GET'])
+def get_sort():
+    X_new = np.array([[float(request.args.get('list1')),
+                           float(request.args.get('list2')),
+                           float(request.args.get('list3'))]])
+    pred = str('{:.2f}'.format(model.predict(X_new)[0][0]))
+
+    return jsonify(sort=pred)
+
+@app.route('/api_v2', methods=['GET'])
+def get_sort_v2():
+    request_data = request.get_json()
+    X_new = np.array([[float(request_data['list1']),
+                           float(request_data['list2']),
+                           float(request_data['list3'])]])
+    pred = str('{:.2f}'.format(model.predict(X_new)[0][0]))
+
+    return jsonify(sort=pred)
 
 if __name__ == "__main__":
     app.run(debug=True)
