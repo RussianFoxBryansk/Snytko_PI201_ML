@@ -1,20 +1,24 @@
 import pickle
 import numpy as np
 from flask import Flask, render_template, url_for, request, jsonify
+import tensorflow as tf
+from model3.neuron import SingleNeuron
 
 app = Flask(__name__)
 
 
 menu = [{"name": "Главная", "url": "/"},
-        {"name": "Лаба 1", "url": "p_knn"},
-        {"name": "Лаба 2", "url": "p_lab2"},
-        {"name": "Лаба 3", "url": "p_lab3"}]
+        {"name": "Лаб1", "url": "p_knn"},
+        {"name": "Лаб2", "url": "p_lab2"},
+        {"name": "Лаб3", "url": "p_lab3"},
+        {"name": "Лаб4", "url": "neuron1"},
+        {"name": "Лаб5", "url": "api_reg_tf?distance=600&transport_mode=1&cost=3500"},
+        {"name": "Лаб6", "url": "api_class_tf?distance=600&transport_mode=1&cost=3500"}]
 
 
 ###########################################################
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-import numpy as np
 from math import sqrt
 data = pd.read_excel('DATASET.xlsx')
 
@@ -83,6 +87,12 @@ accuracy = accuracy(y_true, y_pred)
 model2 = pickle.load(open('model2/Cat.ai', 'rb'))
 model = pickle.load(open('model/HeightWeightGender=FootSize', 'rb'))
 
+
+
+new_neuron = SingleNeuron(input_size=2)
+new_neuron.load_weights('model3/neuron_weights.txt')
+model_reg = tf.keras.models.load_model('model3/regression_model.h5')
+model_class = tf.keras.models.load_model('model3/classification_model.h5')
 
 @app.route("/")
 def index():
@@ -157,6 +167,57 @@ def get_sort_v2():
     pred = str('{:.2f}'.format(model.predict(X_new)[0][0]))
 
     return jsonify(sort=pred)
+
+@app.route("/neuron1", methods=['POST', 'GET'])
+def p_lab4():
+    if request.method == 'GET':
+        return render_template('lab4.html', title="Первый нейрон", menu=menu, class_model='')
+    if request.method == 'POST':
+        X_new = np.array([[float(request.form['list1']),
+                           float(request.form['list2'])]])
+        predictions = new_neuron.forward(X_new)
+        print("Предсказанные значения:", predictions, *np.where(predictions >= 0.5, 'Помидор', 'Огурец'))
+        return render_template('lab4.html', title="Первый нейрон", menu=menu,
+                               class_model="Это: " + str(*np.where(predictions >= 0.5, 'Помидор', 'Огурец')))
+
+@app.route('/api_reg_tf', methods=['GET'])
+def predict_regression():
+    # Получение данных из запроса "http://localhost:5000/api_reg_tf?distance=600&transport_mode=1&cost=3500"
+    distance = float(request.args.get('distance'))
+    transport_mode = int(request.args.get('transport_mode'))
+    cost = float(request.args.get('cost'))
+
+    # Формирование входных данных для модели
+    input_data = np.array([[distance, transport_mode, cost]])
+
+    # Предсказание времени в пути
+    predictions = model_reg.predict(input_data)
+
+    return jsonify(time_needed=str(predictions[0][0]))
+
+@app.route('/api_class_tf', methods=['get'])
+def predict_classification():
+    # Получение данных из запроса http://localhost:5000/api_class_tf?distance=600&transport_mode=1&cost=3500
+    distance = float(request.args.get('distance'))
+    transport_mode = int(request.args.get('transport_mode'))
+    cost = float(request.args.get('cost'))
+
+    # Формирование входных данных для модели
+    input_data = np.array([[distance, transport_mode, cost]])
+
+    # Предсказание
+    predictions = model_class.predict(input_data)
+    # Интерпретация предсказания
+    if predictions[0][0] >= 0.5:
+        result = 'Эконом'
+    else:
+        result = 'Бизнес'
+
+    # Установите флаг для корректного отображения кириллицы в JSON
+    app.config['JSON_AS_ASCII'] = False
+
+    # Возврат результата
+    return jsonify(result=result)
 
 if __name__ == "__main__":
     app.run(debug=True)
