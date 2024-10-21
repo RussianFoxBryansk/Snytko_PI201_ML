@@ -1,11 +1,26 @@
 import numpy as np
-from neuron import SingleNeuron
+from neuron import OurNeuralNetwork
 
-# Загрузка весов из файла и тестирование
-new_neuron = SingleNeuron(input_size=2)
-new_neuron.load_weights('neuron_weights.txt')
 
-# Пример использования
-test_data = np.array([[9, 9]])
-predictions = new_neuron.forward(test_data)
-print("Предсказанные значения:", predictions, *np.where(predictions >= 0.5, 'Помидор', 'Огурец'))
+def load_and_test_model(test_data):
+    model = OurNeuralNetwork()
+    try:
+        model.load_weights('neuron_weights.txt')
+    except FileNotFoundError:
+        print("Ошибка: файл 'neuron_weights.txt' не найден.")
+        return
+
+    predictions = np.apply_along_axis(model.feedforward, 1, test_data)
+
+    # Преобразуем предсказания в классы
+    gender = ['Мужчина' if p >= 0.5 else 'Женщина' for p in predictions]
+
+    print("Предсказанные значения:", predictions)
+    print("Классы:", gender)
+
+
+if __name__ == "__main__":
+    # Убедитесь, что размер test_data соответствует ожидаемым входным данным
+    test_data = np.array([[175, 70, 42], [160, 30, 32]])  # Пример тестовых данных
+    load_and_test_model(test_data)
+

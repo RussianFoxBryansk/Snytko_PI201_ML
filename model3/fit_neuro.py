@@ -1,19 +1,26 @@
 import numpy as np
-from neuron import SingleNeuron
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from neuron import OurNeuralNetwork
 
+def prepare_data(file_path):
+    np_dataset = np.array(pd.read_excel(file_path))
+    np_y = np_dataset[:, 3].reshape(-1, 1)
+    np_x1 = np_dataset[:, 0].reshape(-1, 1)
+    np_x2 = np_dataset[:, 1].reshape(-1, 1)
+    np_x3 = np_dataset[:, 2].reshape(-1, 1)
 
-# Пример данных (X - входные данные, y - целевые значения)
-X = np.array([[5, 6],
-              [7, 7],
-              [3, 9],
-              [4, 10],
-              [5, 5],
-              [3, 8],
-              [5, 10]])
-y = np.array([1, 1, 0, 0, 1, 0, 0])  # Ожидаемый выход
-# Инициализация и обучение нейрона
-neuron = SingleNeuron(input_size=2)
-neuron.train(X, y, epochs=5000, learning_rate=0.1)
+    labelencoder = LabelEncoder()
+    np_y = labelencoder.fit_transform(np_y.ravel())  # Убедитесь, что это одномерный массив
+    data = np.hstack((np_x1, np_x2, np_x3))
+    all_y_trues = np_y
+    return data, all_y_trues
 
-# Сохранение весов в файл
-neuron.save_weights('neuron_weights.txt')
+def train_model(data, all_y_trues):
+    network = OurNeuralNetwork()
+    network.train(data, all_y_trues)
+    network.save_weights('neuron_weights.txt')
+
+if __name__ == "__main__":
+    data, all_y_trues = prepare_data('DATASET.XLSX')
+    train_model(data, all_y_trues)

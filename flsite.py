@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 from flask import Flask, render_template, url_for, request, jsonify
 import tensorflow as tf
-from model3.neuron import SingleNeuron
+from model3.neuron import OurNeuralNetwork
 
 app = Flask(__name__)
 
@@ -89,7 +89,7 @@ model = pickle.load(open('model/HeightWeightGender=FootSize', 'rb'))
 
 
 
-new_neuron = SingleNeuron(input_size=2)
+new_neuron = OurNeuralNetwork()
 new_neuron.load_weights('model3/neuron_weights.txt')
 model_reg = tf.keras.models.load_model('model3/regression_model.h5')
 model_class = tf.keras.models.load_model('model3/classification_model.h5')
@@ -168,17 +168,32 @@ def get_sort_v2():
 
     return jsonify(sort=pred)
 
+
 @app.route("/neuron1", methods=['POST', 'GET'])
 def p_lab4():
     if request.method == 'GET':
         return render_template('lab4.html', title="Первый нейрон", menu=menu, class_model='')
+
     if request.method == 'POST':
-        X_new = np.array([[float(request.form['list1']),
-                           float(request.form['list2'])]])
-        predictions = new_neuron.forward(X_new)
-        print("Предсказанные значения:", predictions, *np.where(predictions >= 0.5, 'Помидор', 'Огурец'))
+        # Получаем данные из формы
+        height = float(request.form['height'])  # Рост
+        weight = float(request.form['weight'])  # Вес
+        size = float(request.form['size'])  # Размер
+
+        # Формируем входные данные для нейронной сети
+        X_new = np.array([[height, weight, size]])  # Обратите внимание, что теперь 3 параметра
+
+        # Получаем предсказания от нейронной сети
+        predictions = new_neuron.feedforward(X_new)
+
+        # Определяем пол на основе предсказания
+        gender = 'Мужчина' if predictions >= 0.5 else 'Женщина'
+
+        print("Предсказанные значения:", predictions, gender)
+
         return render_template('lab4.html', title="Первый нейрон", menu=menu,
-                               class_model="Это: " + str(*np.where(predictions >= 0.5, 'Помидор', 'Огурец')))
+                               class_model="Это: " + gender)
+
 
 @app.route('/api_reg_tf', methods=['GET'])
 def predict_regression():

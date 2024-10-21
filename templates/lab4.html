@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
- 
+
 {% block content %}
 {{ super() }}
-<p>Нейрон для классификации оовощей
+<p>Нейрон для классификации пола</p>
 <form action="/neuron1" method="POST">
-    <p><input type="text" class="form_text" name="list1"> Длина овоща</p>
-    <p><input name="list2" class="form_text" type="text"> Ширина овоща</p>
-    <input type="submit" class="form_btn" value="Узнать что за овощ">
+    <p><input type="text" class="form_text" name="height" placeholder="Введите рост (см)">
+    <p><input name="weight" class="form_text" type="text" placeholder="Введите вес (кг)">
+    <p><input name="size" class="form_text" type="text" placeholder="Введите размер"></p>
+    <input type="submit" class="form_btn" value="Узнать пол">
     <h1>{{class_model}}</h1>
-    </p>
 </form>
-
 {% endblock %}
