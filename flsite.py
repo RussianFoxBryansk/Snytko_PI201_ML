@@ -88,9 +88,6 @@ model2 = pickle.load(open('model2/Cat.ai', 'rb'))
 model = pickle.load(open('model/HeightWeightGender=FootSize', 'rb'))
 
 
-
-new_neuron = OurNeuralNetwork()
-new_neuron.load_weights('model3/neuron_weights.txt')
 model_reg = tf.keras.models.load_model('model3/regression_model.h5')
 model_class = tf.keras.models.load_model('model3/classification_model.h5')
 
@@ -169,30 +166,44 @@ def get_sort_v2():
     return jsonify(sort=pred)
 
 
+new_neuron = OurNeuralNetwork()
+try:
+    new_neuron.load_weights('model3/neuron_weights.txt')
+    print("Найден файл 'neuron_weights.txt' .")
+except FileNotFoundError:
+    print("Ошибка: файл 'neuron_weights.txt' не найден.")
+
 @app.route("/neuron1", methods=['POST', 'GET'])
 def p_lab4():
     if request.method == 'GET':
         return render_template('lab4.html', title="Первый нейрон", menu=menu, class_model='')
 
     if request.method == 'POST':
-        # Получаем данные из формы
-        height = float(request.form['height'])  # Рост
-        weight = float(request.form['weight'])  # Вес
-        size = float(request.form['size'])  # Размер
+        try:
+            # Получаем данные из формы
+            height = float(request.form['height'])  # Рост
+            weight = float(request.form['weight'])  # Вес
+            size = float(request.form['size'])  # Размер
 
-        # Формируем входные данные для нейронной сети
-        X_new = np.array([[height, weight, size]])  # Обратите внимание, что теперь 3 параметра
+            # Формируем входные данные для нейронной сети
+            X_new = np.array([[height, weight, size]])  # Убедитесь, что 3 параметра
+            print(X_new)
+            # Получаем предсказания от нейронной сети
 
-        # Получаем предсказания от нейронной сети
-        predictions = new_neuron.feedforward(X_new)
+            predictions = np.apply_along_axis(new_neuron.feedforward, 1, X_new)
 
-        # Определяем пол на основе предсказания
-        gender = 'Мужчина' if predictions >= 0.5 else 'Женщина'
+            # Определяем пол на основе предсказания
+            gender = 'Мужчина' if predictions[0] >= 0.5 else 'Женщина'
 
-        print("Предсказанные значения:", predictions, gender)
+            print("Предсказанные значения:", predictions, gender)
 
-        return render_template('lab4.html', title="Первый нейрон", menu=menu,
-                               class_model="Это: " + gender)
+            return render_template('lab4.html', title="Первый нейрон", menu=menu,
+                                   class_model="Это: " + gender)
+
+        except Exception as e:
+            print("Ошибка:", e)  # Логируем ошибку
+            return render_template('lab4.html', title="Первый нейрон", menu=menu,
+                                   class_model="Произошла ошибка: " + str(e))
 
 
 @app.route('/api_reg_tf', methods=['GET'])

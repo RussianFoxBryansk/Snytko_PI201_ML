@@ -21,6 +21,6 @@ def load_and_test_model(test_data):
 
 if __name__ == "__main__":
     # Убедитесь, что размер test_data соответствует ожидаемым входным данным
-    test_data = np.array([[175, 70, 42], [160, 30, 32]])  # Пример тестовых данных
+    test_data = np.array([[175, 70, 42]])  # Пример тестовых данных
     load_and_test_model(test_data)
 
