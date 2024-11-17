@@ -1,7 +1,9 @@
+import os
 import pickle
 import numpy as np
 from flask import Flask, render_template, url_for, request, jsonify
 import tensorflow as tf
+from tensorflow.keras.preprocessing import image
 from model3.neuron import OurNeuralNetwork
 
 app = Flask(__name__)
@@ -90,6 +92,7 @@ model = pickle.load(open('model/HeightWeightGender=FootSize', 'rb'))
 
 model_reg = tf.keras.models.load_model('model3/regression_model.h5')
 model_class = tf.keras.models.load_model('model3/classification_model.h5')
+model_fm = tf.keras.models.load_model('model4/fashion_mnist_model.h5')
 
 @app.route("/")
 def index():
@@ -244,6 +247,50 @@ def predict_classification():
 
     # Возврат результата
     return jsonify(result=result)
+
+
+@app.route("/tf_mnis", methods=['GET', 'POST'])
+def tf_mnis():
+    if request.method == 'GET':
+        return render_template('lab5.html')  # Замените на 'lab5.html'
+
+    if request.method == 'POST':
+        try:
+            if 'file' not in request.files:
+                raise Exception("Файл не найден")
+            file = request.files['file']
+
+            if file.filename == '':
+                raise Exception("Файл не выбран")
+            if file and allowed_file(file.filename):
+                file_path = os.path.join('static', file.filename)
+                file.save(file_path)
+
+                img = image.load_img(file_path, target_size=(28, 28), color_mode='grayscale')
+                x = image.img_to_array(img)
+                x = x.reshape(1, 784)  # Нормализация для модели
+                x /= 255.0  # Нормализация данных
+
+                prediction = model_fm.predict(x)  # Предсказание на основе загруженного изображения
+                predicted_class_index = np.argmax(prediction)
+
+                class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+                               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+                predicted_class_name = class_names[predicted_class_index]
+
+                return render_template('lab5.html', class_name=predicted_class_name, image_path=file.filename)
+
+            else:
+                raise Exception("Неподдерживаемый файл")
+        except Exception as e:
+            print("Ошибка:", e)
+            return render_template('lab5.html', error=str(e))
+
+
+# Функция для проверки типов файлов
+def allowed_file(filename):
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
 if __name__ == "__main__":
     app.run(debug=True)
