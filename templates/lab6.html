@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<h1>Загрузите изображение для классификации</h1>
+<form action="/my_mnis" method="POST" enctype="multipart/form-data">
+    <p>
+        <input type="file" name="file" accept=".png,.jpg,.jpeg,.gif" required>
+    </p>
+    <input type="submit" class="form_btn" value="Загрузить">
+
+    {% if class_name %}
+        <h2>Предсказанный класс: {{ class_name }}</h2>
+        <h2>Загруженное изображение:</h2>
+        <img src="{{ url_for('static', filename=image_path) }}" alt="Uploaded Image" style="max-width: 300px; max-height: 300px;">
+    {% endif %}
+
+    {% if error %}
+        <p style="color: red;">Ошибка: {{ error }}</p>
+    {% endif %}
+</form>
+{% endblock %}

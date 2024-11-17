@@ -93,6 +93,7 @@ model = pickle.load(open('model/HeightWeightGender=FootSize', 'rb'))
 model_reg = tf.keras.models.load_model('model3/regression_model.h5')
 model_class = tf.keras.models.load_model('model3/classification_model.h5')
 model_fm = tf.keras.models.load_model('model4/fashion_mnist_model.h5')
+model_mm = tf.keras.models.load_model('model4/flowers_4_model.h5')
 
 @app.route("/")
 def index():
@@ -252,7 +253,7 @@ def predict_classification():
 @app.route("/tf_mnis", methods=['GET', 'POST'])
 def tf_mnis():
     if request.method == 'GET':
-        return render_template('lab5.html')  # Замените на 'lab5.html'
+        return render_template('lab5.html')
 
     if request.method == 'POST':
         try:
@@ -287,6 +288,54 @@ def tf_mnis():
             return render_template('lab5.html', error=str(e))
 
 
+# Функция для загрузки названий классов из файла
+def load_class_names(file_path):
+    with open(file_path, 'r') as f:
+        class_names = [line.strip() for line in f.readlines()]
+    return class_names
+
+# Загружаем названия классов один раз при старте приложения
+class_names = load_class_names('model4/class_names.txt')
+
+@app.route("/my_mnis", methods=['GET', 'POST'])
+def my_mnis():
+    if request.method == 'GET':
+        return render_template('lab6.html')
+
+    if request.method == 'POST':
+        try:
+            if 'file' not in request.files:
+                raise Exception("Файл не найден")
+            file = request.files['file']
+
+            if file.filename == '':
+                raise Exception("Файл не выбран")
+            if file and allowed_file(file.filename):
+                file_path = os.path.join('static', file.filename)
+                file.save(file_path)
+
+                # Load and preprocess the image
+                img = image.load_img(file_path, target_size=(180, 180))  # Correct size
+                x = image.img_to_array(img)
+                x = np.expand_dims(x, axis=0)  # Create a batch of 1
+                x /= 255.0  # Normalize
+
+                # Make the prediction
+                prediction = model_mm.predict(x)  # Use that model you've defined
+                predicted_class_index = np.argmax(prediction)
+
+                # Печать вероятностей каждого класса в консоли
+                print(f"Предсказание модели: {prediction[0]}")
+
+                predicted_class_name = class_names[predicted_class_index]
+
+                return render_template('lab6.html', class_name=predicted_class_name, image_path=file.filename)
+
+            else:
+                raise Exception("Неподдерживаемый файл")
+        except Exception as e:
+            print("Ошибка:", e)
+            return render_template('lab6.html', error=str(e))
 # Функция для проверки типов файлов
 def allowed_file(filename):
     allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
