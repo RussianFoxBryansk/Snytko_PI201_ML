@@ -94,6 +94,7 @@ model_reg = tf.keras.models.load_model('model3/regression_model.h5')
 model_class = tf.keras.models.load_model('model3/classification_model.h5')
 model_fm = tf.keras.models.load_model('model4/fashion_mnist_model.h5')
 model_mm = tf.keras.models.load_model('model4/flowers_4_model.h5')
+model_my = tf.keras.models.load_model('model4/my_model.h5')
 
 @app.route("/")
 def index():
@@ -310,24 +311,35 @@ def my_mnis():
 
             if file.filename == '':
                 raise Exception("Файл не выбран")
+
             if file and allowed_file(file.filename):
                 file_path = os.path.join('static', file.filename)
                 file.save(file_path)
 
-                # Load and preprocess the image
-                img = image.load_img(file_path, target_size=(180, 180))  # Correct size
+                # Загрузка и предварительная обработка изображения
+                img = image.load_img(file_path, target_size=(180, 180))  # Корректный размер
                 x = image.img_to_array(img)
-                x = np.expand_dims(x, axis=0)  # Create a batch of 1
-                x /= 255.0  # Normalize
+                x = np.expand_dims(x, axis=0)  # Создаем пакет из 1 изображения
+                x /= 255.0  # Нормализация
 
-                # Make the prediction
-                prediction = model_mm.predict(x)  # Use that model you've defined
+                # Получаем выбранную модель
+                selected_model = request.form['model']
+
+                # Предсказание с использованием выбранной модели
+                if selected_model == 'model1':
+                    prediction = model_mm.predict(x)  # Используем MobileNetV2
+                    model_name = "MobileNetV2"
+                elif selected_model == 'model2':
+                    prediction = model_my.predict(x)  # Используем собственный нейрон
+                    model_name = "Собственный нейрон"
+
+                # Определяем класс и вероятность из предсказания
                 predicted_class_index = np.argmax(prediction)
-
-                # Печать вероятностей каждого класса в консоли
-                print(f"Предсказание модели: {prediction[0]}")
-
                 predicted_class_name = class_names[predicted_class_index]
+                prediction_probability = np.max(prediction)  # Максимальная вероятность
+
+                # Выводим информацию в консоль
+                print(f"Модель: {model_name}, Предсказанный класс: {predicted_class_name}, Вероятность: {prediction_probability:.4f}")
 
                 return render_template('lab6.html', class_name=predicted_class_name, image_path=file.filename)
 
@@ -336,10 +348,14 @@ def my_mnis():
         except Exception as e:
             print("Ошибка:", e)
             return render_template('lab6.html', error=str(e))
+
+
+
 # Функция для проверки типов файлов
 def allowed_file(filename):
     allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
 
 if __name__ == "__main__":
     app.run(debug=True)

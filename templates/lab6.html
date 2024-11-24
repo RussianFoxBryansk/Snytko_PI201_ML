@@ -7,6 +7,14 @@
     <p>
         <input type="file" name="file" accept=".png,.jpg,.jpeg,.gif" required>
     </p>
+    <h3>Выберите модель для классификации:</h3>
+    <p>
+        <select name="model" required>
+            <option value="model1">Используем MobileNetV2</option>
+            <option value="model2">Используем Собственный нейрон</option>
+        </select>
+    </p>
+
     <input type="submit" class="form_btn" value="Загрузить">
 
     {% if class_name %}
