@@ -1,9 +1,11 @@
 import torch
-from PIL import Image
 import cv2
 import numpy as np
+import pandas
+from PIL import Image
+import requests
+import ultralytics
 
-# Загрузка модели YOLOv5
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
 
 # Загрузка изображения
@@ -41,3 +43,9 @@ for _, row in filtered_results.iterrows():
 cv2.imshow("Filtered Image", filtered_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+# Сохранение отфильтрованного изображения
+cv2.imwrite("filtered_image.png", filtered_image)
+
+# Сохранение результатов в CSV-файл
+filtered_results.to_csv("results.csv", index=False)

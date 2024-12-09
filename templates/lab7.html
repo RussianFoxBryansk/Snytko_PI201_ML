@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 7</title>
+</head>
+<body>
+    <h1>Детектирование</h1>
+    <form action="/detect" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Загрузить фото</button>
+    </form>
+    {% if filtered_image_path %}
+    <h2>Results:</h2>
+    <h3>Filtered Image:</h3>
+    <img src="{{ filtered_image_path }}" alt="Filtered Image">
+    <h3>Detections:</h3>
+    <pre>{{ detections | tojson }}</pre>
+    {% endif %}
+</body>
+</html>
